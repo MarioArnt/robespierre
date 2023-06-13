@@ -3,11 +3,11 @@ import { spawnSync } from "child_process";
 
 /**
  * Returns the executable path which is located inside `node_modules`
- * The naming convention is npm-diff-${os}-${arch}
+ * The naming convention is robespierre-${os}-${arch}
  * If the platform is `win32` or `cygwin`, executable will include a `.exe` extension.
  * @see https://nodejs.org/api/os.html#osarch
  * @see https://nodejs.org/api/os.html#osplatform
- * @example "x/xx/node_modules/npm-diff-darwin-arm64"
+ * @example "x/xx/node_modules/robespierre-darwin-arm64"
  */
 function getExePath() {
   const arch = process.arch;
