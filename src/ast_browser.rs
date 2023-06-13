@@ -69,9 +69,9 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
     }
 }
 
-pub fn resolve_actual_imports() -> HashSet<String> {
+pub fn resolve_actual_imports(pattern: String) -> HashSet<String> {
     let mut actual_imports = HashSet::new();
-    for entry in glob("**/*.ts").expect("Failed to read glob pattern") {
+    for entry in glob(&pattern).expect("Failed to read glob pattern") {
         match entry {
             Ok(path) => {
                 process_typescript_file(path.display().to_string(), &mut actual_imports);
