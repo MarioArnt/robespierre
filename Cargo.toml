@@ -1,5 +1,5 @@
 [package]
-name = "npm-diff"
+name = "robespierre"
 version = "0.1.0"
 edition = "2021"
 
