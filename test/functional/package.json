@@ -1,0 +1,7 @@
+{
+  "name": "test-project",
+  "dependencies": {
+    "foo": "^1.0.0",
+    "baz": "^2.0.0"
+  }
+}
