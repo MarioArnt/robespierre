@@ -10,7 +10,7 @@ use swc_common::{
     errors::{Handler},
     SourceMap,
 };
-use swc_ecma_parser::EsConfig;
+use swc_ecma_parser::{TsConfig};
 use swc_ecma_parser::Syntax;
 use swc_common::{GLOBALS, Globals};
 use swc_ecma_ast::Program;
@@ -30,8 +30,8 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
         let result = c.parse_js(
             fm,
             &handler,
-            EsVersion::Es2020,
-            Syntax::Es(EsConfig::default()),
+            EsVersion::Es2022,
+            Syntax::Typescript(TsConfig::default()),
             swc::config::IsModule::Bool(true),
             None,
         );
