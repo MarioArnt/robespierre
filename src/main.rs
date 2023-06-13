@@ -7,7 +7,7 @@ use std::string::String;
 fn main() {
     let declared_dependencies = manifest::read_manifest();
     let default_pattern: String = "**/*.ts".to_string();
-    let pattern: String = env::var("NPM_DIFF_SOURCES").unwrap_or(default_pattern);
+    let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(default_pattern);
     let actual_imports = ast_browser::resolve_actual_imports(pattern);
     match declared_dependencies {
         Ok(declared) => {
