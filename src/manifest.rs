@@ -6,13 +6,13 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::env;
 
-use anyhow::{Result, bail, Ok as Success};
+use anyhow::{Result, bail};
 use serde::{Deserialize, Serialize};
 use std::result::Result::{Ok as StdOk};
 
 #[derive(Serialize, Deserialize)]
 struct Manifest {
-    dependencies: HashMap<String, String>,
+    dependencies: Option<HashMap<String, String>>,
 }
 
 fn find_closest_parent_manifest(path: &Path) -> Option<PathBuf> {
@@ -28,7 +28,7 @@ fn find_closest_parent_manifest(path: &Path) -> Option<PathBuf> {
     }
 }
 
-pub fn read_manifest() -> Result<HashSet<String>> {
+pub fn read_manifest_dependencies() -> Result<HashSet<String>> {
     return match env::current_dir() {
         StdOk(current_dir) => {
             let manifest = find_closest_parent_manifest(&Path::new(&current_dir.into_os_string()));
@@ -39,7 +39,12 @@ pub fn read_manifest() -> Result<HashSet<String>> {
                         .expect("Should have been able to read the manifest");
                     let manifest: Manifest = serde_json::from_str(&raw)
                         .expect("Cannot parse manifest");
-                    Success(manifest.dependencies.keys().cloned().collect())
+                    let dependencies = manifest.dependencies;
+                    let empty_hash_set: HashSet<String> = HashSet::new();
+                    match dependencies {
+                        Some(deps) => Ok(deps.keys().cloned().collect()),
+                        None => Ok(empty_hash_set),
+                    }
                 }
                 None => bail!("Manifest file cannot be found, make sure you are running this command in a valid NPM project")
             }
