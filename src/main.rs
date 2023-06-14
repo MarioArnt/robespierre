@@ -5,7 +5,7 @@ use std::env;
 use std::string::String;
 
 fn main() {
-    let declared_dependencies = manifest::read_manifest();
+    let declared_dependencies = manifest::read_manifest_dependencies();
     let default_pattern: String = "**/*.ts".to_string();
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(default_pattern);
     let actual_imports = ast_browser::resolve_actual_imports(pattern);
