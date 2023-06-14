@@ -55,10 +55,10 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
                                             None => todo!()
                                         }
                                     }
-                                    None => todo!()
+                                    None => ()
                                 }
                             }
-                            Stmt(_stmt) => todo!()
+                            Stmt(_stmt) => ()
                         }
                     }
                 }
