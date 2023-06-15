@@ -1,13 +1,14 @@
 mod manifest;
 mod ast_browser;
+mod manifest_spec;
 
 use std::env;
 use std::string::String;
 
 fn main() {
     let declared_dependencies = manifest::read_manifest_dependencies();
-    let default_pattern: String = "**/*.ts".to_string();
-    let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(default_pattern);
+    const DEFAULT_PATTERN: &str = "**/*.ts";
+    let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
     let actual_imports = ast_browser::resolve_actual_imports(pattern);
     match declared_dependencies {
         Ok(declared) => {
