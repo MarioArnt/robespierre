@@ -20,6 +20,18 @@ pub fn filtered_internal_deps(dependencies: HashSet<String>) -> HashSet<String> 
     filtered_deps
 }
 
+pub fn crop_dep_only(dependency: String) -> String {
+    let split_dep: Vec<_> = dependency.split("/").collect();
+
+    if split_dep.len() == 1 {
+        String::from(split_dep[0])
+    } else if split_dep.len() > 1 {
+        split_dep[0].to_owned() + "/" + split_dep[1]
+    } else {
+        String::new()
+    }
+}
+
 #[cfg(test)]
 mod remove_first_and_last_chars_tests {
     use crate::ast_browser::utils::remove_first_and_last_chars;
@@ -77,5 +89,28 @@ mod filtered_internal_deps_tests {
         base_deps.insert(internal_dep);
         let result = filtered_internal_deps(base_deps);
         assert_eq!(result.len(), 1);
+    }
+}
+
+#[cfg(test)]
+mod crop_dep_only_tests {
+    use crate::ast_browser::utils::crop_dep_only;
+
+    #[test]
+    fn simple_dep_test() {
+        let result = crop_dep_only(String::from("@angular"));
+        assert_eq!(result, "@angular");
+    }
+
+    #[test]
+    fn namespace_dep_test() {
+        let result = crop_dep_only(String::from("@angular/core"));
+        assert_eq!(result, "@angular/core");
+    }
+
+    #[test]
+    fn nested_dep_test() {
+        let result = crop_dep_only(String::from("@angular/core/something"));
+        assert_eq!(result, "@angular/core");
     }
 }
