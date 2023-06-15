@@ -13,13 +13,6 @@ pub fn is_internal_dep(dependency_string: &String) -> bool {
     re.is_match(dependency_string)
 }
 
-pub fn filtered_internal_deps(dependencies: HashSet<String>) -> HashSet<String> {
-    let filtered_deps = dependencies.into_iter()
-            .filter(|dependency| !is_internal_dep(dependency))
-            .collect();
-    filtered_deps
-}
-
 pub fn crop_dep_only(dependency: String) -> String {
     let split_dep: Vec<_> = dependency.split("/").collect();
 
@@ -31,6 +24,15 @@ pub fn crop_dep_only(dependency: String) -> String {
         String::new()
     }
 }
+
+pub fn filtered_and_cropped_deps(dependencies: HashSet<String>) -> HashSet<String> {
+    let filtered_deps = dependencies.into_iter()
+        .filter(|dependency| !is_internal_dep(dependency))
+        .map(|dependency| crop_dep_only(dependency))
+        .collect();
+    filtered_deps
+}
+
 
 #[cfg(test)]
 mod remove_first_and_last_chars_tests {
@@ -67,32 +69,6 @@ mod is_internal_dep_tests {
 }
 
 #[cfg(test)]
-mod filtered_internal_deps_tests {
-    use std::collections::HashSet;
-    use crate::ast_browser::utils::filtered_internal_deps;
-
-    #[test]
-    fn filter_internal_deps_should_returns_same_test() {
-        let mut base_deps: HashSet<String> = HashSet::new();
-        let external_dep: String = String::from("@angular/core");
-        base_deps.insert(external_dep);
-        let result = filtered_internal_deps(base_deps);
-        assert_eq!(result.len(), 1);
-    }
-
-    #[test]
-    fn filter_internal_deps_should_returns_filtered_test() {
-        let mut base_deps: HashSet<String> = HashSet::new();
-        let external_dep: String = String::from("@angular/core");
-        let internal_dep: String = String::from("./aah");
-        base_deps.insert(external_dep);
-        base_deps.insert(internal_dep);
-        let result = filtered_internal_deps(base_deps);
-        assert_eq!(result.len(), 1);
-    }
-}
-
-#[cfg(test)]
 mod crop_dep_only_tests {
     use crate::ast_browser::utils::crop_dep_only;
 
@@ -112,5 +88,66 @@ mod crop_dep_only_tests {
     fn nested_dep_test() {
         let result = crop_dep_only(String::from("@angular/core/something"));
         assert_eq!(result, "@angular/core");
+    }
+}
+
+#[cfg(test)]
+mod filtered_and_cropped_deps_tests {
+    use std::collections::HashSet;
+    use crate::ast_browser::utils::filtered_and_cropped_deps;
+
+    #[test]
+    fn should_returns_same_test() {
+        let mut base_deps: HashSet<String> = HashSet::new();
+        let external_dep: String = String::from("@angular/core");
+        base_deps.insert(external_dep);
+        let result = filtered_and_cropped_deps(base_deps);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result.contains("@angular/core"), true);
+    }
+
+    #[test]
+    fn should_returns_filtered_test() {
+        let mut base_deps: HashSet<String> = HashSet::new();
+        let external_dep: String = String::from("@angular/core");
+        let internal_dep: String = String::from("./aah");
+        base_deps.insert(external_dep);
+        base_deps.insert(internal_dep);
+        let result = filtered_and_cropped_deps(base_deps);
+        assert_eq!(result.len(), 1);
+        assert_eq!(result.contains("@angular/core"), true);
+    }
+
+    #[test]
+    fn should_returns_cropped_test() {
+        let mut base_deps: HashSet<String> = HashSet::new();
+        let simple_external_dep: String = String::from("node");
+        let nested_external_dep: String = String::from("@angular/core/truc");
+        base_deps.insert(simple_external_dep);
+        base_deps.insert(nested_external_dep);
+        let result = filtered_and_cropped_deps(base_deps);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result.contains("node"), true);
+        assert_eq!(result.contains("@angular/core"), true);
+    }
+
+    #[test]
+    fn should_returns_filtered_and_cropped_test() {
+        let mut base_deps: HashSet<String> = HashSet::new();
+        let simple_external_dep: String = String::from("node");
+        let nested_external_dep: String = String::from("@angular/core/truc");
+        let internal_dep: String = String::from("./aah");
+        let namespace_external_dep: String = String::from("@something/utils");
+
+        base_deps.insert(simple_external_dep);
+        base_deps.insert(nested_external_dep);
+        base_deps.insert(internal_dep);
+        base_deps.insert(namespace_external_dep);
+
+        let result = filtered_and_cropped_deps(base_deps);
+        assert_eq!(result.len(), 3);
+        assert_eq!(result.contains("node"), true);
+        assert_eq!(result.contains("@angular/core"), true);
+        assert_eq!(result.contains("@something/utils"), true);
     }
 }
