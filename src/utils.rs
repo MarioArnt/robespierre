@@ -13,7 +13,7 @@ pub fn is_internal_dep(dependency_string: &String) -> bool {
     re.is_match(dependency_string)
 }
 
-pub fn filtered_internal_deps(dependencies: &HashSet<String>) -> HashSet<&String> {
+pub fn filtered_internal_deps(dependencies: HashSet<String>) -> HashSet<String> {
     let filtered_deps = dependencies.into_iter()
             .filter(|dependency| !is_internal_dep(dependency))
             .collect();
@@ -64,7 +64,7 @@ mod filtered_internal_deps_tests {
         let mut base_deps: HashSet<String> = HashSet::new();
         let external_dep: String = String::from("@angular/core");
         base_deps.insert(external_dep);
-        let result = filtered_internal_deps(&base_deps);
+        let result = filtered_internal_deps(base_deps);
         assert_eq!(result.len(), 1);
     }
 
@@ -75,7 +75,7 @@ mod filtered_internal_deps_tests {
         let internal_dep: String = String::from("./aah");
         base_deps.insert(external_dep);
         base_deps.insert(internal_dep);
-        let result = filtered_internal_deps(&base_deps);
+        let result = filtered_internal_deps(base_deps);
         assert_eq!(result.len(), 1);
     }
 }
