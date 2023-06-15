@@ -1,3 +1,5 @@
+#![feature(str_split_remainder)]
+
 mod manifest;
 mod ast_browser;
 mod manifest_spec;
