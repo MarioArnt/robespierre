@@ -15,7 +15,7 @@ use swc_ecma_parser::Syntax;
 use swc_common::{GLOBALS, Globals};
 use swc_ecma_ast::Program;
 use swc_ecma_ast::ModuleItem::{Stmt,ModuleDecl};
-use crate::ast_browser::utils::filtered_internal_deps;
+use crate::ast_browser::utils::filtered_and_cropped_deps;
 
 #[path = "utils.rs"] mod utils;
 
@@ -80,5 +80,5 @@ pub fn resolve_actual_imports(pattern: String) -> HashSet<String> {
             Err(e) => println!("{:?}", e),
         }
     }
-    filtered_internal_deps(actual_imports)
+    filtered_and_cropped_deps(actual_imports)
 }
