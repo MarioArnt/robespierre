@@ -9,7 +9,7 @@ use std::string::String;
 
 fn main() {
     let declared_dependencies = manifest::read_manifest_dependencies();
-    const DEFAULT_PATTERN: &str = "**/*.ts";
+    const DEFAULT_PATTERN: &str = "**/!(*.d|*.spec|*.test).ts";
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
     let actual_imports = ast_browser::resolve_actual_imports(pattern);
     match declared_dependencies {
