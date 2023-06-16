@@ -22,14 +22,14 @@ use crate::ast_browser::utils::filtered_and_cropped_deps;
 fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
     let globals = Globals::new();
     let ast: Result<Program, anyhow::Error> = GLOBALS.set(&globals,|| {
-        let cm = Arc::<SourceMap>::default();
-        let c = swc::Compiler::new(cm.clone());
-        let fm = cm
+        let source_map = Arc::<SourceMap>::default();
+        let compiler = swc::Compiler::new(source_map.clone());
+        let file_manager = source_map
             .load_file(Path::new(&path))
             .expect("Failed to load typescript source");
-        let handler = Handler::with_emitter_writer(Box::new(stderr()), Some(c.cm.clone()));
-        let result = c.parse_js(
-            fm,
+        let handler = Handler::with_emitter_writer(Box::new(stderr()), Some(compiler.cm.clone()));
+        let result = compiler.parse_js(
+            file_manager,
             &handler,
             EsVersion::Es2022,
             Syntax::Typescript(TsConfig::default()),
@@ -46,7 +46,6 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
                         match item {
                             ModuleDecl(decl) => {
                                 let import = decl.as_import();
-
                                 match import {
                                     Some(i) => {
                                         match &i.src.raw {

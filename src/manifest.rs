@@ -40,15 +40,25 @@ pub fn read_manifest_dependencies() -> Result<HashSet<String>> {
                     let manifest: Manifest = serde_json::from_str(&raw)
                         .expect("Cannot parse manifest");
                     let dependencies = manifest.dependencies;
-                    let empty_hash_set: HashSet<String> = HashSet::new();
-                    match dependencies {
-                        Some(deps) => Ok(deps.keys().cloned().collect()),
-                        None => Ok(empty_hash_set),
-                    }
+                    let mut final_dependencies: HashSet<String> = HashSet::new();
+                    insert_dependencies(dependencies, &mut final_dependencies);
+                    Ok(final_dependencies)
                 }
                 None => bail!("Manifest file cannot be found, make sure you are running this command in a valid NPM project")
             }
         },
         Err(_) => bail!("Fatal: unable to resolve current working directory")
     }
+}
+
+fn insert_dependencies(dependencies: Option<HashMap<String, String>>, final_dependencies: &mut HashSet<String>) {
+    match dependencies {
+        Some(deps) => Ok({
+            let dep_list: Vec<String> = deps.keys().cloned().collect();
+            for dep in dep_list {
+                final_dependencies.insert(dep);
+            }
+        }),
+        None => Err(final_dependencies),
+    }.expect("TODO: panic message");
 }
