@@ -1,7 +1,7 @@
 #![feature(str_split_remainder)]
 
-mod manifest;
 mod ast_browser;
+mod manifest;
 mod manifest_spec;
 
 use std::env;
@@ -25,6 +25,6 @@ fn main() {
                 println!("{:?}", dep);
             }
         }
-        Err(err) => println!("{:?}", err)
+        Err(err) => println!("{:?}", err),
     }
 }
