@@ -1,0 +1,40 @@
+name: Quality
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update local toolchain
+        run: |
+          rustup update
+          rustup component add clippy
+          rustup install nightly
+
+      - name: Toolchain info
+        run: |
+          cargo --version
+          rustc --version
+          cargo clippy --version
+          cargo fmt --version
+
+      - name: Lint
+        run: |
+          cd src
+          cargo +nightly fmt -- --check
+          cargo +nightly clippy -- -D warnings
+
+      - name: Test
+        run: |
+          cargo +nightly check
+          cargo +nightly test --all          
+
+      - name: Build
+        run: |
+          cargo +nightly build --release
