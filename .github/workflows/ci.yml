@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+      - chore/**
+      - fix/**
+      - feat/**
 
 jobs:
   run_tests:
