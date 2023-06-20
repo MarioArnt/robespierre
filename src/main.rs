@@ -12,7 +12,7 @@ fn main() {
     let declared_dependencies = manifest::read_manifest_dependencies(project_root.clone());
     const DEFAULT_PATTERN: &str = "**/*.ts";
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
-    let actual_imports = ast_browser::resolve_actual_imports(project_root.clone(), pattern);
+    let actual_imports = ast_browser::resolve_actual_imports(project_root, pattern);
     match declared_dependencies {
         Ok(declared) => {
             let extraneous = declared.difference(&actual_imports);

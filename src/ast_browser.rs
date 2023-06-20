@@ -5,7 +5,6 @@ use std::{path::Path, sync::Arc};
 
 use anyhow::Result;
 use glob::glob;
-use swc::atoms::Atom;
 
 use crate::ast_browser::utils::filtered_and_cropped_deps;
 use swc_common::{errors::Handler, SourceMap};
@@ -28,15 +27,15 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
             .load_file(Path::new(&path))
             .expect("Failed to load typescript source");
         let handler = Handler::with_emitter_writer(Box::new(stderr()), Some(compiler.cm.clone()));
-        let result = compiler.parse_js(
+
+        compiler.parse_js(
             file_manager,
             &handler,
             EsVersion::Es2022,
             Syntax::Typescript(TsConfig::default()),
             swc::config::IsModule::Bool(true),
             None,
-        );
-        result
+        )
     });
     println!("Analyzing path: {:?}", path);
     let mut file_imports: HashSet<String> = HashSet::new();

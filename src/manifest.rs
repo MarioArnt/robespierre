@@ -18,11 +18,11 @@ pub fn find_project_root() -> Result<PathBuf> {
     match env::current_dir() {
         StdOk(current_dir) => {
             let cwd = current_dir.into_os_string();
-            let project_root_result = find_closest_parent_manifest(&Path::new(&cwd));
-            return match project_root_result {
+            let project_root_result = find_closest_parent_manifest(Path::new(&cwd));
+            match project_root_result {
                 Some(project_root) => Ok(project_root.to_path_buf()),
                 None => bail!("Manifest file cannot be found, make sure you are running this command in a valid NPM project")
-            };
+            }
         }
         Err(_) => bail!("Fatal: unable to resolve current working directory"),
     }
@@ -33,7 +33,7 @@ fn find_closest_parent_manifest(path: &Path) -> Option<&Path> {
         return Some(path);
     }
     return match path.parent() {
-        Some(parent) => find_closest_parent_manifest(&parent),
+        Some(parent) => find_closest_parent_manifest(parent),
         None => None,
     };
 }
