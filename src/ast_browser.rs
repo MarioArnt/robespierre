@@ -1,69 +1,64 @@
 use std::collections::HashSet;
+use std::io::stderr;
 use std::{path::Path, sync::Arc};
-use std::{io::stderr};
 
-use anyhow::{Result};
+use anyhow::Result;
 use glob::glob;
 
-use swc_ecma_ast::EsVersion;
-use swc_common::{
-    errors::{Handler},
-    SourceMap,
-};
-use swc_ecma_parser::{TsConfig};
-use swc_ecma_parser::Syntax;
-use swc_common::{GLOBALS, Globals};
-use swc_ecma_ast::Program;
-use swc_ecma_ast::ModuleItem::{Stmt,ModuleDecl};
 use crate::ast_browser::utils::filtered_and_cropped_deps;
+use swc_common::{errors::Handler, SourceMap};
+use swc_common::{Globals, GLOBALS};
+use swc_ecma_ast::EsVersion;
+use swc_ecma_ast::ModuleItem::{ModuleDecl, Stmt};
+use swc_ecma_ast::Program;
+use swc_ecma_parser::Syntax;
+use swc_ecma_parser::TsConfig;
 
-#[path = "utils.rs"] mod utils;
+#[path = "utils.rs"]
+mod utils;
 
 fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
     let globals = Globals::new();
-    let ast: Result<Program, anyhow::Error> = GLOBALS.set(&globals,|| {
+    let ast: Result<Program, anyhow::Error> = GLOBALS.set(&globals, || {
         let source_map = Arc::<SourceMap>::default();
         let compiler = swc::Compiler::new(source_map.clone());
         let file_manager = source_map
             .load_file(Path::new(&path))
             .expect("Failed to load typescript source");
         let handler = Handler::with_emitter_writer(Box::new(stderr()), Some(compiler.cm.clone()));
-        let result = compiler.parse_js(
+
+        compiler.parse_js(
             file_manager,
             &handler,
             EsVersion::Es2022,
             Syntax::Typescript(TsConfig::default()),
             swc::config::IsModule::Bool(true),
             None,
-        );
-        result
+        )
     });
     match ast {
-        Ok(tree) => {
-            match tree.module() {
-                Some(module) => {
-                    for item in module.body {
-                        match item {
-                            ModuleDecl(decl) => {
-                                let import = decl.as_import();
-                                match import {
-                                    Some(i) => {
-                                        match &i.src.raw {
-                                            Some(src) => {
-                                                actual_imports.insert(utils::remove_first_and_last_chars(src.to_string()));
-                                            }
-                                            None => todo!()
-                                        }
+        Ok(tree) => match tree.module() {
+            Some(module) => {
+                for item in module.body {
+                    match item {
+                        ModuleDecl(decl) => {
+                            let import = decl.as_import();
+                            if let Some(i) = import {
+                                match &i.src.raw {
+                                    Some(src) => {
+                                        actual_imports.insert(utils::remove_first_and_last_chars(
+                                            src.to_string(),
+                                        ));
                                     }
-                                    None => ()
+                                    None => todo!(),
                                 }
                             }
-                            Stmt(_stmt) => ()
                         }
+                        Stmt(_stmt) => (),
                     }
                 }
-                None => todo!()
             }
+            None => todo!(),
         },
         Err(e) => println!("{:?}", e),
     }
@@ -75,7 +70,7 @@ pub fn resolve_actual_imports(pattern: String) -> HashSet<String> {
         match entry {
             Ok(path) => {
                 process_typescript_file(path.display().to_string(), &mut actual_imports);
-            },
+            }
             Err(e) => println!("{:?}", e),
         }
     }

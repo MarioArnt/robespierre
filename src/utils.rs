@@ -1,5 +1,6 @@
-use std::collections::HashSet;
 use regex::Regex;
+use std::cmp::Ordering;
+use std::collections::HashSet;
 
 pub fn remove_first_and_last_chars(value: String) -> String {
     let mut chars = value.chars();
@@ -8,31 +9,28 @@ pub fn remove_first_and_last_chars(value: String) -> String {
     chars.as_str().to_string()
 }
 
-pub fn is_internal_dep(dependency_string: &String) -> bool {
+pub fn is_internal_dep(dependency_string: &str) -> bool {
     let re = Regex::new(r"^\.+").unwrap();
     re.is_match(dependency_string)
 }
 
 pub fn crop_dep_only(dependency: String) -> String {
-    let split_dep: Vec<_> = dependency.split("/").collect();
+    let split_dep: Vec<_> = dependency.split('/').collect();
 
-    if split_dep.len() == 1 {
-        String::from(split_dep[0])
-    } else if split_dep.len() > 1 {
-        split_dep[0].to_owned() + "/" + split_dep[1]
-    } else {
-        String::new()
+    match split_dep.len().cmp(&1) {
+        Ordering::Equal => String::from(split_dep[0]),
+        Ordering::Greater => split_dep[0].to_owned() + "/" + split_dep[1],
+        Ordering::Less => String::new(),
     }
 }
 
 pub fn filtered_and_cropped_deps(dependencies: HashSet<String>) -> HashSet<String> {
-    let filtered_deps = dependencies.into_iter()
+    dependencies
+        .into_iter()
         .filter(|dependency| !is_internal_dep(dependency))
-        .map(|dependency| crop_dep_only(dependency))
-        .collect();
-    filtered_deps
+        .map(crop_dep_only)
+        .collect()
 }
-
 
 #[cfg(test)]
 mod remove_first_and_last_chars_tests {
@@ -47,24 +45,24 @@ mod remove_first_and_last_chars_tests {
 
 #[cfg(test)]
 mod is_internal_dep_tests {
-    use crate::ast_browser::utils::{is_internal_dep};
+    use crate::ast_browser::utils::is_internal_dep;
 
     #[test]
     fn is_internal_dep_should_returns_true_with_local_dep_test() {
         let result = is_internal_dep(&String::from("./aah"));
-        assert_eq!(result, true);
+        assert!(result);
     }
 
     #[test]
     fn is_internal_dep_should_returns_true_with_out_dep_test() {
         let result = is_internal_dep(&String::from("../../aah"));
-        assert_eq!(result, true);
+        assert!(result);
     }
 
     #[test]
     fn is_internal_dep_should_returns_false_with_internal_test() {
         let result = is_internal_dep(&String::from("@angular/core"));
-        assert_eq!(result, false);
+        assert!(!result);
     }
 }
 
@@ -93,8 +91,8 @@ mod crop_dep_only_tests {
 
 #[cfg(test)]
 mod filtered_and_cropped_deps_tests {
-    use std::collections::HashSet;
     use crate::ast_browser::utils::filtered_and_cropped_deps;
+    use std::collections::HashSet;
 
     #[test]
     fn should_returns_same_test() {
@@ -103,7 +101,7 @@ mod filtered_and_cropped_deps_tests {
         base_deps.insert(external_dep);
         let result = filtered_and_cropped_deps(base_deps);
         assert_eq!(result.len(), 1);
-        assert_eq!(result.contains("@angular/core"), true);
+        assert!(result.contains("@angular/core"));
     }
 
     #[test]
@@ -115,7 +113,7 @@ mod filtered_and_cropped_deps_tests {
         base_deps.insert(internal_dep);
         let result = filtered_and_cropped_deps(base_deps);
         assert_eq!(result.len(), 1);
-        assert_eq!(result.contains("@angular/core"), true);
+        assert!(result.contains("@angular/core"));
     }
 
     #[test]
@@ -127,8 +125,8 @@ mod filtered_and_cropped_deps_tests {
         base_deps.insert(nested_external_dep);
         let result = filtered_and_cropped_deps(base_deps);
         assert_eq!(result.len(), 2);
-        assert_eq!(result.contains("node"), true);
-        assert_eq!(result.contains("@angular/core"), true);
+        assert!(result.contains("node"));
+        assert!(result.contains("@angular/core"));
     }
 
     #[test]
@@ -146,8 +144,8 @@ mod filtered_and_cropped_deps_tests {
 
         let result = filtered_and_cropped_deps(base_deps);
         assert_eq!(result.len(), 3);
-        assert_eq!(result.contains("node"), true);
-        assert_eq!(result.contains("@angular/core"), true);
-        assert_eq!(result.contains("@something/utils"), true);
+        assert!(result.contains("node"));
+        assert!(result.contains("@angular/core"));
+        assert!(result.contains("@something/utils"));
     }
 }

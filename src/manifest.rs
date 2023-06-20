@@ -1,14 +1,14 @@
-use std::collections::HashSet;
 use std::collections::HashMap;
-use std::option::Option;
+use std::collections::HashSet;
+use std::env;
 use std::fs;
+use std::option::Option;
 use std::path::Path;
 use std::path::PathBuf;
-use std::env;
 
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use serde::{Deserialize, Serialize};
-use std::result::Result::{Ok as StdOk};
+use std::result::Result::Ok as StdOk;
 
 #[derive(Serialize, Deserialize)]
 struct Manifest {
@@ -21,17 +21,15 @@ fn find_closest_parent_manifest(path: &Path) -> Option<PathBuf> {
         return Some(manifest);
     }
     return match path.parent() {
-        Some(parent) => {
-            find_closest_parent_manifest(&parent)
-        }
-        None => None
-    }
+        Some(parent) => find_closest_parent_manifest(parent),
+        None => None,
+    };
 }
 
 pub fn read_manifest_dependencies() -> Result<HashSet<String>> {
     return match env::current_dir() {
         StdOk(current_dir) => {
-            let manifest = find_closest_parent_manifest(&Path::new(&current_dir.into_os_string()));
+            let manifest = find_closest_parent_manifest(Path::new(&current_dir.into_os_string()));
             match manifest {
                 Some(manifest_path) => {
                     println!("Found manifest path at {}", manifest_path.display());
@@ -46,19 +44,26 @@ pub fn read_manifest_dependencies() -> Result<HashSet<String>> {
                 }
                 None => bail!("Manifest file cannot be found, make sure you are running this command in a valid NPM project")
             }
-        },
-        Err(_) => bail!("Fatal: unable to resolve current working directory")
-    }
+        }
+        Err(_) => bail!("Fatal: unable to resolve current working directory"),
+    };
 }
 
-fn insert_dependencies(dependencies: Option<HashMap<String, String>>, final_dependencies: &mut HashSet<String>) {
+fn insert_dependencies(
+    dependencies: Option<HashMap<String, String>>,
+    final_dependencies: &mut HashSet<String>,
+) {
     match dependencies {
-        Some(deps) => Ok({
-            let dep_list: Vec<String> = deps.keys().cloned().collect();
-            for dep in dep_list {
-                final_dependencies.insert(dep);
-            }
-        }),
+        Some(deps) => {
+            {
+                let dep_list: Vec<String> = deps.keys().cloned().collect();
+                for dep in dep_list {
+                    final_dependencies.insert(dep);
+                }
+            };
+            Ok(())
+        }
         None => Err(final_dependencies),
-    }.expect("TODO: panic message");
+    }
+    .expect("TODO: panic message");
 }
