@@ -41,29 +41,28 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
     let mut file_imports: HashSet<String> = HashSet::new();
     let mut is_test_file = false;
     match ast {
-        Ok(tree) => match tree.module() {
-            Some(module) => {
+        Ok(tree) => {
+            if let Some(module) = tree.module() {
                 for item in module.body {
                     match item {
                         ModuleDecl(decl) => {
                             let import = decl.as_import();
-                            match import {
-                                Some(i) => match &i.src.raw {
+                            if let Some(i) = import {
+                                match &i.src.raw {
                                     Some(src) => {
                                         file_imports.insert(utils::remove_first_and_last_chars(
                                             src.to_string(),
                                         ));
                                     }
                                     None => (),
-                                },
-                                None => (),
+                                }
                             }
                         }
-                        Stmt(stmt) => match stmt.as_expr() {
-                            Some(expr) => match expr.expr.as_call() {
-                                Some(call_expr) => match call_expr.callee.as_expr() {
-                                    Some(callee_expr) => match callee_expr.as_ident() {
-                                        Some(ident) => {
+                        Stmt(stmt) => {
+                            if let Some(expr) = stmt.as_expr() {
+                                if let Some(call_expr) = expr.expr.as_call() {
+                                    if let Some(callee_expr) = call_expr.callee.as_expr() {
+                                        if let Some(ident) = callee_expr.as_ident() {
                                             if ident.sym.to_lowercase() == "describe"
                                                 || ident.sym.to_lowercase() == "it"
                                                 || ident.sym.to_lowercase() == "test"
@@ -71,19 +70,14 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
                                                 is_test_file = true;
                                             }
                                         }
-                                        None => (),
-                                    },
-                                    None => (),
-                                },
-                                None => (),
-                            },
-                            None => (),
-                        },
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-            None => (),
-        },
+        }
         Err(e) => println!("{:?}", e),
     }
     if !is_test_file {
