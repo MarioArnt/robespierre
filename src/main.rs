@@ -14,8 +14,10 @@ fn main() {
     let actual_imports = ast_browser::resolve_actual_imports(project_root, pattern);
     match declared_dependencies {
         Ok(declared) => {
-            let extraneous = declared.difference(&actual_imports);
-            let implicit = actual_imports.difference(&declared);
+            let mut extraneous: Vec<_> = declared.difference(&actual_imports).collect();
+            let mut implicit: Vec<_> = actual_imports.difference(&declared).collect();
+            extraneous.sort();
+            implicit.sort();
             println!("Extraneous dependencies");
             for dep in extraneous {
                 println!("{:?}", dep);
