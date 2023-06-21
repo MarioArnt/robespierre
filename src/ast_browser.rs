@@ -102,7 +102,12 @@ pub fn resolve_actual_imports(project_root: PathBuf, pattern: String) -> HashSet
                     .as_os_str()
                     .to_str()
                     .expect("Fatal: cannot resolve extension");
-                let is_d_ts = &file_name[file_name.len() - 5..] == ".d.ts";
+                let d_ts_string = ".d.ts";
+                let is_d_ts = if file_name.len() > d_ts_string.len() {
+                    &file_name[file_name.len() - d_ts_string.len()..] == d_ts_string
+                } else {
+                    false
+                };
                 if !is_node_module && !is_d_ts {
                     process_typescript_file(path.display().to_string(), &mut actual_imports);
                 }
