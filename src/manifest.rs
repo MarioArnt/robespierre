@@ -3,10 +3,9 @@ use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::option::Option;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Ok, Result};
 use serde::{Deserialize, Serialize};
 use std::result::Result::Ok as StdOk;
 
@@ -15,10 +14,23 @@ struct Manifest {
     dependencies: Option<HashMap<String, String>>,
 }
 
-fn find_closest_parent_manifest(path: &Path) -> Option<PathBuf> {
+pub fn find_project_root() -> Result<PathBuf> {
+    match env::current_dir() {
+        StdOk(current_dir) => {
+            let cwd = current_dir.into_os_string();
+            let project_root_result = find_closest_parent_manifest(Path::new(&cwd));
+            match project_root_result {
+                Some(project_root) => Ok(project_root.to_path_buf()),
+                None => bail!("Manifest file cannot be found, make sure you are running this command in a valid NPM project")
+            }
+        }
+        Err(_) => bail!("Fatal: unable to resolve current working directory"),
+    }
+}
+
+fn find_closest_parent_manifest(path: &Path) -> Option<&Path> {
     if Path::new(path).join("package.json").exists() {
-        let manifest = Path::new(path).join("package.json");
-        return Some(manifest);
+        return Some(path);
     }
     return match path.parent() {
         Some(parent) => find_closest_parent_manifest(parent),
@@ -26,44 +38,15 @@ fn find_closest_parent_manifest(path: &Path) -> Option<PathBuf> {
     };
 }
 
-pub fn read_manifest_dependencies() -> Result<HashSet<String>> {
-    return match env::current_dir() {
-        StdOk(current_dir) => {
-            let manifest = find_closest_parent_manifest(Path::new(&current_dir.into_os_string()));
-            match manifest {
-                Some(manifest_path) => {
-                    println!("Found manifest path at {}", manifest_path.display());
-                    let raw = fs::read_to_string(manifest_path)
-                        .expect("Should have been able to read the manifest");
-                    let manifest: Manifest = serde_json::from_str(&raw)
-                        .expect("Cannot parse manifest");
-                    let dependencies = manifest.dependencies;
-                    let mut final_dependencies: HashSet<String> = HashSet::new();
-                    insert_dependencies(dependencies, &mut final_dependencies);
-                    Ok(final_dependencies)
-                }
-                None => bail!("Manifest file cannot be found, make sure you are running this command in a valid NPM project")
-            }
-        }
-        Err(_) => bail!("Fatal: unable to resolve current working directory"),
+pub fn read_manifest_dependencies(project_root: PathBuf) -> Result<HashSet<String>> {
+    let manifest_path = project_root.join("package.json");
+    println!("Found manifest path at {}", manifest_path.display());
+    let raw =
+        fs::read_to_string(manifest_path).expect("Should have been able to read the manifest");
+    let manifest: Manifest = serde_json::from_str(&raw).expect("Cannot parse manifest");
+    let dependencies = manifest.dependencies;
+    return match dependencies {
+        Some(deps) => Ok(deps.keys().cloned().collect()),
+        None => Ok(HashSet::new()),
     };
-}
-
-fn insert_dependencies(
-    dependencies: Option<HashMap<String, String>>,
-    final_dependencies: &mut HashSet<String>,
-) {
-    match dependencies {
-        Some(deps) => {
-            {
-                let dep_list: Vec<String> = deps.keys().cloned().collect();
-                for dep in dep_list {
-                    final_dependencies.insert(dep);
-                }
-            };
-            Ok(())
-        }
-        None => Err(final_dependencies),
-    }
-    .expect("TODO: panic message");
 }

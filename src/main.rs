@@ -2,20 +2,22 @@
 
 mod ast_browser;
 mod manifest;
-mod manifest_spec;
 
 use std::env;
 use std::string::String;
 
 fn main() {
-    let declared_dependencies = manifest::read_manifest_dependencies();
-    const DEFAULT_PATTERN: &str = "**/!(*.d|*.spec|*.test).ts";
+    let project_root = manifest::find_project_root().unwrap();
+    let declared_dependencies = manifest::read_manifest_dependencies(project_root.clone());
+    const DEFAULT_PATTERN: &str = "**/*.ts";
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
-    let actual_imports = ast_browser::resolve_actual_imports(pattern);
+    let actual_imports = ast_browser::resolve_actual_imports(project_root, pattern);
     match declared_dependencies {
         Ok(declared) => {
-            let extraneous = declared.difference(&actual_imports);
-            let implicit = actual_imports.difference(&declared);
+            let mut extraneous: Vec<_> = declared.difference(&actual_imports).collect();
+            let mut implicit: Vec<_> = actual_imports.difference(&declared).collect();
+            extraneous.sort();
+            implicit.sort();
             println!("Extraneous dependencies");
             for dep in extraneous {
                 println!("{:?}", dep);
