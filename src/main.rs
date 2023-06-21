@@ -2,7 +2,6 @@
 
 mod ast_browser;
 mod manifest;
-mod manifest_spec;
 
 use std::env;
 use std::string::String;
