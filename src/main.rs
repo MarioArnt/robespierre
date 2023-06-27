@@ -4,7 +4,11 @@ mod ast_browser;
 mod manifest;
 
 use std::env;
+use std::fs::{write};
 use std::string::String;
+use serde_json::{json, to_string_pretty};
+
+const REPORT_FILE_NAME: &str = "robespierre_report.json";
 
 fn main() {
     let project_root = manifest::find_project_root().unwrap();
@@ -18,6 +22,17 @@ fn main() {
             let mut implicit: Vec<_> = actual_imports.difference(&declared).collect();
             extraneous.sort();
             implicit.sort();
+
+            let json_to_write = json!({
+                "extraneous_dependencies": extraneous,
+                "implicit_dependencies": implicit,
+            });
+
+            write(
+                REPORT_FILE_NAME,
+                to_string_pretty(&json_to_write).unwrap(),
+            ).expect("TODO: panic message");
+
             println!("Extraneous dependencies");
             for dep in extraneous {
                 println!("{:?}", dep);
