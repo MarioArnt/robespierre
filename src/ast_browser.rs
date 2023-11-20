@@ -32,7 +32,10 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
             file_manager,
             &handler,
             EsVersion::Es2022,
-            Syntax::Typescript(TsConfig::default()),
+            Syntax::Typescript(TsConfig {
+                decorators: true,
+                ..TsConfig::default()
+            }),
             swc::config::IsModule::Bool(true),
             None,
         )
