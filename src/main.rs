@@ -2,6 +2,7 @@
 
 mod ast_browser;
 mod manifest;
+mod write_report;
 
 use std::env;
 use std::string::String;
@@ -18,6 +19,9 @@ fn main() {
             let mut implicit: Vec<_> = actual_imports.difference(&declared).collect();
             extraneous.sort();
             implicit.sort();
+
+            write_report::write_json_report(extraneous.clone(), implicit.clone());
+
             println!("Extraneous dependencies");
             for dep in extraneous {
                 println!("{:?}", dep);
