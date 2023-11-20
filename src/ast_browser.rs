@@ -47,14 +47,16 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
                     match item {
                         ModuleDecl(decl) => {
                             let import = decl.as_import();
-                            if let Some(i) = import {
-                                match &i.src.raw {
-                                    Some(src) => {
-                                        file_imports.insert(utils::remove_first_and_last_chars(
-                                            src.to_string(),
-                                        ));
+                            if let Some(import_declaration) = import {
+                                if !&import_declaration.type_only {
+                                    match &import_declaration.src.raw {
+                                        Some(src) => {
+                                            file_imports.insert(utils::remove_first_and_last_chars(
+                                                src.to_string(),
+                                            ));
+                                        }
+                                        None => (),
                                     }
-                                    None => (),
                                 }
                             }
                         }
