@@ -9,8 +9,8 @@ pub fn remove_first_and_last_chars(value: String) -> String {
     chars.as_str().to_string()
 }
 
-pub fn is_internal_dep(dependency_string: &str) -> bool {
-    let re = Regex::new(r"^\.+").unwrap();
+pub fn is_npm_dep(dependency_string: &str) -> bool {
+    let re = Regex::new(r"^[a-zA-Z0-9@]+").unwrap();
     re.is_match(dependency_string)
 }
 
@@ -27,7 +27,7 @@ pub fn crop_dep_only(dependency: String) -> String {
 pub fn filtered_and_cropped_deps(dependencies: HashSet<String>) -> HashSet<String> {
     dependencies
         .into_iter()
-        .filter(|dependency| !is_internal_dep(dependency))
+        .filter(|dependency| is_npm_dep(dependency))
         .map(crop_dep_only)
         .collect()
 }
@@ -44,24 +44,36 @@ mod remove_first_and_last_chars_tests {
 }
 
 #[cfg(test)]
-mod is_internal_dep_tests {
-    use crate::ast_browser::utils::is_internal_dep;
+mod is_npm_dep_tests {
+    use crate::ast_browser::utils::is_npm_dep;
 
     #[test]
-    fn is_internal_dep_should_returns_true_with_local_dep_test() {
-        let result = is_internal_dep(&String::from("./aah"));
+    fn is_npm_dep_should_returns_false_with_local_dep_test() {
+        let result = is_npm_dep(&String::from("./aah"));
+        assert!(!result);
+    }
+
+    #[test]
+    fn is_npm_dep_should_returns_false_with_local_remote_dep_test() {
+        let result = is_npm_dep(&String::from("../../aah"));
+        assert!(!result);
+    }
+
+    #[test]
+    fn is_npm_dep_should_returns_true_with_external_dep_with_at_test() {
+        let result = is_npm_dep(&String::from("@angular/core"));
         assert!(result);
     }
 
     #[test]
-    fn is_internal_dep_should_returns_true_with_out_dep_test() {
-        let result = is_internal_dep(&String::from("../../aah"));
+    fn is_npm_dep_should_returns_true_with_external_dep_without_at_test() {
+        let result = is_npm_dep(&String::from("rxjs"));
         assert!(result);
     }
 
     #[test]
-    fn is_internal_dep_should_returns_false_with_internal_test() {
-        let result = is_internal_dep(&String::from("@angular/core"));
+    fn is_npm_dep_should_returns_false_with_local_dep_with_hashtag_test() {
+        let result = is_npm_dep(&String::from("#mymodule"));
         assert!(!result);
     }
 }
