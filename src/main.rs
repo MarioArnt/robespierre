@@ -2,13 +2,10 @@
 
 mod ast_browser;
 mod manifest;
+mod write_report;
 
 use std::env;
-use std::fs::{write};
 use std::string::String;
-use serde_json::{json, to_string_pretty};
-
-const REPORT_FILE_NAME: &str = "robespierre_report.json";
 
 fn main() {
     let project_root = manifest::find_project_root().unwrap();
@@ -23,15 +20,7 @@ fn main() {
             extraneous.sort();
             implicit.sort();
 
-            let json_to_write = json!({
-                "extraneous_dependencies": extraneous,
-                "implicit_dependencies": implicit,
-            });
-
-            write(
-                REPORT_FILE_NAME,
-                to_string_pretty(&json_to_write).unwrap(),
-            ).expect("TODO: panic message");
+            write_report::write_json_report(extraneous.clone(), implicit.clone());
 
             println!("Extraneous dependencies");
             for dep in extraneous {
