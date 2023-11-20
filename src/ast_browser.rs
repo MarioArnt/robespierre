@@ -51,9 +51,9 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
                                 if !&import_declaration.type_only {
                                     match &import_declaration.src.raw {
                                         Some(src) => {
-                                            file_imports.insert(utils::remove_first_and_last_chars(
-                                                src.to_string(),
-                                            ));
+                                            file_imports.insert(
+                                                utils::remove_first_and_last_chars(src.to_string()),
+                                            );
                                         }
                                         None => (),
                                     }
