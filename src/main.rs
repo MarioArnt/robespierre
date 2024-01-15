@@ -1,5 +1,3 @@
-#![feature(str_split_remainder)]
-
 mod ast_browser;
 mod manifest;
 mod write_report;
