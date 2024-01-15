@@ -1,8 +1,13 @@
 #![feature(str_split_remainder)]
 
-use ::clap::{Parser};
+use ::clap::Parser;
 #[derive(Parser)]
-#[command(author, version, about, long_about = "Robespierre helps you find extraneous and implicit dependencies in your NPM project")]
+#[command(
+    author,
+    version,
+    about,
+    long_about = "Robespierre helps you find extraneous and implicit dependencies in your NPM project"
+)]
 
 struct Args {
     #[arg(short, long, default_value_t = false, help = "Output a JSON report")]
