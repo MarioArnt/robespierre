@@ -6,8 +6,16 @@ on:
       - "v*.*.*"
 
 jobs:
+  check-branch:
+    name: Check on main branch
+    steps:
+      - name: Exit if not on master branch
+        if: endsWith(github.ref, 'master') == false
+        run: exit -1
+
   publish-npm-binaries:
     name: Publish NPM packages
+    needs: check-branch
     runs-on: ${{ matrix.build.os }}
     strategy:
       fail-fast: false
