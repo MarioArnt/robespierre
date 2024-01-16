@@ -12,7 +12,7 @@ Robespierre is focused on performance and uses [SWC](https://github.com/swc-proj
 
 > The name "robespierre" is a humorous reference to Maximilien de Robespierre, a significant political figure in the French Revolution. Known for prolifically using the guillotine, our binary borrows its name because it helps you figure out which dependency's head to cut off!
 
-## Installation
+## Installation :arrow_down:
 
 ```bash
 # Via npm
@@ -25,7 +25,7 @@ yarn add -D robespierre
 pnpm add -D robespierre
 ```
 
-## Usage
+## Usage :page_facing_up:
 
 ```bash
 # List available commands
@@ -38,7 +38,7 @@ robespierre
 robespierre --report
 ```
 
-## Build (Rust)
+## Build :crab:
 
 You can build the Robespierre Rust executable yourself, therefore you will need a working Rust and Cargo setup.
 
@@ -48,10 +48,27 @@ In order to compile for your native platform, just run:
 cargo +nightly build --release
 ```
 
-## Packaging (Npm)
+## Packaging :package:
 
 You can then wrap the binary (by using bash):
 
 ```bash
+export OS=drawin
+export ARCH=arm64
+
 ./package.sh
 ```
+
+# Release :rocket:
+
+To publish a new version on NPM use the script to version and tag to trigger a Github workflow.
+
+```bash
+export RELEASE_VERSION=1.0.12
+sh ./version.sh ${RELEASE_VERSION}
+git commit -am"chore: publish ${RELEASE_VERSION} :tada:"
+git tag v${RELEASE_VERSION}
+git push --tags
+```
+
+When branch is merged on main, the packages are built and publish on NPM.
