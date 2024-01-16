@@ -2,6 +2,52 @@ use regex::Regex;
 use std::cmp::Ordering;
 use std::collections::HashSet;
 
+const BUILT_IN: [&str; 41] = [
+    "assert",
+    "async_hooks",
+    "buffer",
+    "child_process",
+    "cluster",
+    "console",
+    "constants",
+    "crypto",
+    "dgram",
+    "diagnostics_channel",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "http",
+    "http2",
+    "https",
+    "inspector",
+    "module",
+    "net",
+    "os",
+    "path",
+    "perf_hooks",
+    "process",
+    "punycode",
+    "querystring",
+    "readline",
+    "repl",
+    "stream",
+    "string_decoder",
+    "timers",
+    "tls",
+    "trace_events",
+    "tty",
+    "url",
+    "util",
+    "v8",
+    "vm",
+    "wasi",
+    "worker_threads",
+    "zlib",
+];
+
+const NODE_PROTOCOL: &str = "node:";
+
 pub fn remove_first_and_last_chars(value: String) -> String {
     let mut chars = value.chars();
     chars.next();
@@ -11,7 +57,23 @@ pub fn remove_first_and_last_chars(value: String) -> String {
 
 pub fn is_npm_dep(dependency_string: &str) -> bool {
     let re = Regex::new(r"^[a-zA-Z0-9@]+").unwrap();
-    re.is_match(dependency_string)
+    re.is_match(dependency_string) && !is_built_in_dep(dependency_string)
+}
+
+pub fn is_built_in_dep(dependency_string: &str) -> bool {
+    let mut module_name = String::from(dependency_string);
+
+    if module_name.starts_with(NODE_PROTOCOL) {
+        module_name = module_name.trim_start_matches(NODE_PROTOCOL).to_string();
+    }
+
+    if let Some(slash_index) = module_name.find('/') {
+        if slash_index != module_name.len() - 1 {
+            module_name = module_name[..slash_index].to_string();
+        }
+    }
+
+    BUILT_IN.contains(&&*module_name)
 }
 
 pub fn crop_dep_only(dependency: String) -> String {
@@ -74,6 +136,30 @@ mod is_npm_dep_tests {
     #[test]
     fn is_npm_dep_should_returns_false_with_local_dep_with_hashtag_test() {
         let result = is_npm_dep(&String::from("#mymodule"));
+        assert!(!result);
+    }
+
+    #[test]
+    fn is_npm_built_in_without_protocol() {
+        let result = is_npm_dep(&String::from("fs"));
+        assert!(!result);
+    }
+
+    #[test]
+    fn is_npm_built_in_with_protocol() {
+        let result = is_npm_dep(&String::from("node:child_process"));
+        assert!(!result);
+    }
+
+    #[test]
+    fn is_npm_built_in_without_protocol_slash() {
+        let result = is_npm_dep(&String::from("fs/promises"));
+        assert!(!result);
+    }
+
+    #[test]
+    fn is_npm_built_in_with_protocol_slash() {
+        let result = is_npm_dep(&String::from("node:fs/promises"));
         assert!(!result);
     }
 }
