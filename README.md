@@ -45,7 +45,7 @@ You can build the Robespierre Rust executable yourself, therefore you will need 
 In order to compile for your native platform, just run:
 
 ```bash
-cargo +nightly build --release
+cargo build --release
 ```
 
 ## :package: Packaging
@@ -53,7 +53,7 @@ cargo +nightly build --release
 You can then wrap the binary (by using bash):
 
 ```bash
-export OS=drawin
+export OS=darwin
 export ARCH=arm64
 
 ./package.sh
