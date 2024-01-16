@@ -25,20 +25,20 @@ jobs:
         run: |
           cargo --version
           rustc --version
-          cargo clippy --version
           cargo fmt --version
+          cargo clippy --version
 
       - name: Lint
         run: |
           cd src
-          cargo +nightly fmt -- --check
-          cargo +nightly clippy -- -D warnings
+          cargo fmt -- --check
+          cargo clippy -- -D warnings
 
       - name: Test
         run: |
-          cargo +nightly check
-          cargo +nightly test --all          
+          cargo check
+          cargo test --all          
 
       - name: Build
         run: |
-          cargo +nightly build --release
+          cargo build --release
