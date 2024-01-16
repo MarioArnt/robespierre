@@ -1,4 +1,6 @@
-# Robespierre
+<p align="center">
+  <img src="./robespierre.svg?sanitize=true" alt="Logo"/>
+</p>
 
 Robespierre is a tool built in RUST and packaged via NPM that helps you find extraneous and implicit dependencies by 
 comparing your manifest and actual imports in your **typescript** code using AST parsing.
