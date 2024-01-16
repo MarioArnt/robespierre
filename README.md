@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./robespierre.svg?sanitize=true" alt="Logo"/>
+  <img src="./robespierre.svg?sanitize=true" alt="Logo" width=400 />
 </p>
 
 Robespierre is a tool built in RUST and packaged via NPM that helps you find extraneous and implicit dependencies by 
