@@ -6,12 +6,29 @@ on:
       - "v*.*.*"
 
 jobs:
+  get_related_branches:
+    name: Get related branches for the tag
+    runs-on: ubuntu-20.04
+    outputs:
+      branch: ${{ steps.get_related_branches.outputs.branch }}
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v4
+      - name: Get related branches
+        id: get_related_branches
+        run: |
+          raw=$(git branch -r --contains ${{ github.ref }})
+          branch="$(echo ${raw//origin\//} | tr -d '\n')"
+          echo "{name}=branch" >> $GITHUB_OUTPUT
+          echo "Branches where this tag exists : $branch."
+
   check-branch:
     name: Check on main branch
+    needs: get_related_branches
     runs-on: ubuntu-20.04
     steps:
       - name: Exit if not on main branch
-        if: endsWith(github.ref, 'main') == false
+        if: contains(${{ needs.get_related_branches.outputs.branch }}, 'main')
         run: exit -1
 
   publish-npm-binaries:
@@ -54,7 +71,7 @@ jobs:
           }
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set the release version
         shell: bash
         run: |
@@ -96,7 +113,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install node
         uses: actions/setup-node@v3
