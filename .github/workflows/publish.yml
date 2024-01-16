@@ -81,6 +81,10 @@ jobs:
         shell: bash
         run: sh ./package.sh --publish
         env:
+          BUILD_NAME: ${{ matrix.build.NAME }}
+          BUILD_OS: ${{ matrix.build.OS }}
+          BUILD_TARGET: ${{ matrix.build.TARGET }}
+          NODE_VERSION: ${{ env.RELEASE_VERSION }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-npm-base:
