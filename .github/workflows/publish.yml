@@ -10,12 +10,12 @@ jobs:
     name: Get related branches for the tag
     runs-on: ubuntu-20.04
     outputs:
-      branch: ${{ steps.check_step.outputs.branch }}
+      branch: ${{ steps.get_related_branches.outputs.branch }}
     steps:
       - name: checkout source code
         uses: actions/checkout@v4
       - name: Get related branches
-        id: check_step
+        id: get_related_branches
         run: |
           raw=$(git branch -r --contains ${{ github.ref }})
           branch="$(echo ${raw//origin\//} | tr -d '\n')"
