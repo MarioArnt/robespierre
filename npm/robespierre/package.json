@@ -36,7 +36,7 @@
   },
   "optionalDependencies": {
     "robespierre-linux-x64": "1.0.0-beta.0",
-    "robespierre-linux-arm64":"0.0.0",
+    "robespierre-linux-arm64": "1.0.0-beta.0",
     "robespierre-darwin-x64": "1.0.0-beta.0",
     "robespierre-darwin-arm64": "1.0.0-beta.0",
     "robespierre-windows-x64": "1.0.0-beta.0",
