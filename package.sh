@@ -26,8 +26,10 @@ if [ "${BUILD_OS}" = "windows-2022" ]; then
   bin="${bin}.exe"
 fi
 cp "../target/${BUILD_TARGET}/release/${bin}" "${node_pkg}/bin"
+cp "../README.md" "${node_pkg}"
 # publish the package
 if [ "$1" = "--publish" ]; then
   cd "${node_pkg}"
   npm publish --access public
 fi
+rm "${node_pkg}/README.md"
