@@ -8,7 +8,7 @@ export node_os
 node_arch=$(echo "${BUILD_NAME}" | cut -d '-' -f2)
 export node_arch
 # set the version
-export node_version="${NODE_VERSION}"
+export node_version="${BUILD_VERSION}"
 # set the package name
 # note: use 'windows' as OS name instead of 'win32'
 if [ "${BUILD_OS}" = "windows-2022" ]; then

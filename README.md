@@ -50,11 +50,14 @@ cargo build --release
 
 ## :package: Packaging
 
-You can then wrap the binary (by using bash):
+You can then wrap the binary manually
 
 ```bash
-export OS=darwin
-export ARCH=arm64
+export BUILD_OS=drawin
+export BUILD_ARCH=arm64
+export BUILD_NAME="${BUILD_OS}-${BUILD_ARCH}"
+export BUILD_VERSION=1.0.12
+export BUILD_TARGET=/path/to/compiled/robespierre
 
 ./package.sh
 ```

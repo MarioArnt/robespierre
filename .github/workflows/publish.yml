@@ -10,8 +10,8 @@ jobs:
     name: Check on main branch
     runs-on: ubuntu-20.04
     steps:
-      - name: Exit if not on master branch
-        if: endsWith(github.ref, 'master') == false
+      - name: Exit if not on main branch
+        if: endsWith(github.ref, 'main') == false
         run: exit -1
 
   publish-npm-binaries:
@@ -87,7 +87,7 @@ jobs:
           BUILD_NAME: ${{ matrix.build.NAME }}
           BUILD_OS: ${{ matrix.build.OS }}
           BUILD_TARGET: ${{ matrix.build.TARGET }}
-          NODE_VERSION: ${{ env.RELEASE_VERSION }}
+          BUILD_VERSION: ${{ env.RELEASE_VERSION }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-npm-base:
