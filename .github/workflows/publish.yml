@@ -104,7 +104,7 @@ jobs:
         shell: bash
         run: |
           cd npm/robespierre
-          npm ci
+          npm i
           npm run build
           npm publish --access public
         env:
