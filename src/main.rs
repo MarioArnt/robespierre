@@ -1,3 +1,17 @@
+use ::clap::Parser;
+#[derive(Parser)]
+#[command(
+    author,
+    version,
+    about,
+    long_about = "Robespierre helps you find extraneous and implicit dependencies in your NPM project"
+)]
+
+struct Args {
+    #[arg(short, long, default_value_t = false, help = "Output a JSON report")]
+    report: bool,
+}
+
 mod ast_browser;
 mod manifest;
 mod write_report;
@@ -6,6 +20,7 @@ use std::env;
 use std::string::String;
 
 fn main() {
+    let args = Args::parse();
     let project_root = manifest::find_project_root().unwrap();
     let declared_dependencies = manifest::read_manifest_dependencies(project_root.clone());
     const DEFAULT_PATTERN: &str = "**/*.ts";
@@ -18,7 +33,9 @@ fn main() {
             extraneous.sort();
             implicit.sort();
 
-            write_report::write_json_report(extraneous.clone(), implicit.clone());
+            if args.report {
+                write_report::write_json_report(extraneous.clone(), implicit.clone());
+            }
 
             println!("Extraneous dependencies");
             for dep in extraneous {

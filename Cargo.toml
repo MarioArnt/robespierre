@@ -1,12 +1,13 @@
 [package]
 name = "robespierre"
-version = "0.1.0"
+version = "0.0.8"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "^1.0.79"
+clap = { version = "4.4.16", features = ["derive"] }
 glob = "~0.3.1"
 regex = "^1.10.2"
 serde = { version = "^1.0.195", features = ["derive"] }
