@@ -39,8 +39,7 @@
     "robespierre-linux-arm64": "1.0.0-beta.4",
     "robespierre-darwin-x64": "1.0.0-beta.4",
     "robespierre-darwin-arm64": "1.0.0-beta.4",
-    "robespierre-windows-x64": "1.0.0-beta.4",
-    "robespierre-windows-arm64": "1.0.0-beta.4"
+    "robespierre-windows-x64": "1.0.0-beta.4"
   },
   "eslintConfig": {
     "extends": [
