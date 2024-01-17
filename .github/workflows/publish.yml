@@ -103,26 +103,26 @@ jobs:
           current=$(npm view ${node_pkg} --json | jq -r '.version')
           [[ "$current" == "$TARGET_VERSION" ]] && echo "bump=false" >> "$GITHUB_OUTPUT" || echo "bump=true" >> "$GITHUB_OUTPUT"
       - name: Install Rust toolchain
-        if: steps.npm_check.outputs.bump == 'true'
+        if: steps.npm_check_bin.outputs.bump == 'true'
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.build.TOOLCHAIN }}
           target: ${{ matrix.build.TARGET }}
           override: true
       - name: Test
-        if: steps.npm_check.outputs.bump == 'true'
+        if: steps.npm_check_bin.outputs.bump == 'true'
         run: |
           cargo check
           cargo test --all
       - name: Build
-        if: steps.npm_check.outputs.bump == 'true'
+        if: steps.npm_check_bin.outputs.bump == 'true'
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release --locked --target ${{ matrix.build.TARGET }}
           use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
       - name: Publish to NPM
-        if: steps.npm_check.outputs.bump == 'true'
+        if: steps.npm_check_bin.outputs.bump == 'true'
         shell: bash
         run: sh ./package.sh --publish
         env:
