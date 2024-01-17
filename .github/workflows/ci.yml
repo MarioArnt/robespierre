@@ -3,13 +3,12 @@ name: Quality
 on:
   push:
     branches:
-      - main
       - chore/**
       - fix/**
       - feat/**
 
 jobs:
-  run_tests:
+  run_tests_and_build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

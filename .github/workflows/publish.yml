@@ -2,38 +2,48 @@ name: Publish
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - main
 
 jobs:
-  get_related_branches:
-    name: Get related branches for the tag
-    runs-on: ubuntu-20.04
-    outputs:
-      branch: ${{ steps.get_related_branches.outputs.branch }}
+  run_tests:
+    runs-on: ubuntu-latest
     steps:
-      - name: checkout source code
-        uses: actions/checkout@v4
-      - name: Get related branches
-        id: get_related_branches
+      - uses: actions/checkout@v3
+      - name: Update local toolchain
         run: |
-          raw=$(git branch -r --contains ${{ github.ref }})
-          branch="$(echo ${raw//origin\//} | tr -d '\n')"
-          echo "{name}=branch" >> $GITHUB_OUTPUT
-          echo "Branches where this tag exists : $branch."
+          rustup update
+          rustup component add clippy
+          rustup component add rustfmt
+      - name: Toolchain info
+        run: |
+          cargo --version
+          rustc --version
+          cargo fmt --version
+          cargo clippy --version
+      - name: Lint
+        run: |
+          cd src
+          cargo fmt -- --check
+          cargo clippy -- -D warnings
+      - name: Test
+        run: |
+          cargo check
+          cargo test --all          
 
-  check-branch:
-    name: Check on main branch
-    needs: get_related_branches
-    runs-on: ubuntu-20.04
+  need_publish:
+    runs-on: ubuntu-latest
+    needs: run_tests
+    outputs:
+      is_bumped: ${{ steps.npm_check.outputs.changes }}
     steps:
-      - name: Exit if not on main branch
-        if: contains(${{ needs.get_related_branches.outputs.branch }}, 'main')
-        run: exit -1
+      - id: npm_check
+        run: sh ./should-bump.sh >> "$GITHUB_OUTPUT"
 
   publish-npm-binaries:
     name: Publish NPM packages
-    needs: check-branch
+    needs: need_publish
+    if: needs.need_publish.outputs.is_bumped == 'true'
     runs-on: ${{ matrix.build.os }}
     strategy:
       fail-fast: false
@@ -110,6 +120,7 @@ jobs:
   publish-npm-base:
     name: Publish the base NPM package
     needs: publish-npm-binaries
+    if: needs.need_publish.outputs.is_bumped == 'true'
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
