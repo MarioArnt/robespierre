@@ -40,31 +40,37 @@ jobs:
             NAME: linux-x64-glibc,
             OS: ubuntu-20.04,
             TARGET: x86_64-unknown-linux-gnu,
+            TOOLCHAIN: stable,
           }
           - {
             NAME: linux-arm64-glibc,
             OS: ubuntu-20.04,
             TARGET: aarch64-unknown-linux-gnu,
+            TOOLCHAIN: stable,
           }
           - {
             NAME: win32-x64-msvc,
             OS: windows-2022,
             TARGET: x86_64-pc-windows-msvc,
+            TOOLCHAIN: stable,
           }
           - {
             NAME: win32-arm64-msvc,
             OS: windows-2022,
             TARGET: aarch64-pc-windows-msvc,
+            TOOLCHAIN: stable,
           }
           - {
             NAME: darwin-x64,
             OS: macos-11,
             TARGET: x86_64-apple-darwin,
+            TOOLCHAIN: stable,
           }
           - {
             NAME: darwin-arm64,
             OS: macos-11,
             TARGET: aarch64-apple-darwin,
+            TOOLCHAIN: stable,
           }
     steps:
       - name: Checkout
