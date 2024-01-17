@@ -35,7 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: run_tests
     outputs:
-      is_bumped: ${{ steps.npm_check.outputs.changes }}
+      is_bumped: ${{ steps.npm_check.outputs.bump }}
+      npm_target_version: ${{ steps.npm_check.outputs.target_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,7 +50,8 @@ jobs:
         run: |
           manifest=$(jq -r '.version' ./npm/robespierre/package.json)
           npm=$(npm view robespierre --json | jq -r '.version')
-          [[ "$manifest" == "$npm" ]] && echo "false" >> "$GITHUB_OUTPUT" || echo "true" >> "$GITHUB_OUTPUT"
+          [[ "$manifest" == "$npm" ]] && echo "bump=false" >> "$GITHUB_OUTPUT" || echo "bump=true" >> "$GITHUB_OUTPUT"
+          echo "target_version=$(jq -r '.version' ./npm/robespierre/package.json)" >> "$GITHUB_OUTPUT"
 
   publish-npm-binaries:
     name: Publish NPM packages
@@ -151,3 +153,9 @@ jobs:
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: actions-ecosystem/action-push-tag@v1
+        env:
+          TARGET_VERSION: ${{needs.need_publish.outputs.npm_target_version}}
+        name: Push tag
+        with:
+          tag: $TARGET_VERSION
