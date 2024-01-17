@@ -85,6 +85,7 @@ jobs:
         shell: bash
         env:
           TARGET_VERSION: ${{needs.need_publish.outputs.npm_target_version}}
+          BUILD_OS: ${{ matrix.build.OS }}
           BUILD_NAME: ${{ matrix.build.NAME }}
         run: |
           bin="robespierre"
