@@ -54,12 +54,13 @@ jobs:
             TARGET: x86_64-pc-windows-msvc,
             TOOLCHAIN: stable,
           }
-          - {
-            NAME: win32-arm64-msvc,
-            OS: windows-2022,
-            TARGET: aarch64-pc-windows-msvc,
-            TOOLCHAIN: nightly,
-          }
+#         # FIXME: Build hangs infinitely
+#          - {
+#            NAME: win32-arm64-msvc,
+#            OS: windows-2022,
+#            TARGET: aarch64-pc-windows-msvc,
+#            TOOLCHAIN: nightly,
+#          }
           - {
             NAME: darwin-x64,
             OS: macos-11,
