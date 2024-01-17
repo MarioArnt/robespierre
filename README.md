@@ -70,8 +70,6 @@ To publish a new version on NPM use the script to version and tag to trigger a G
 export RELEASE_VERSION=1.0.12
 sh ./version.sh ${RELEASE_VERSION}
 git commit -am"chore: publish ${RELEASE_VERSION} :tada:"
-git tag v${RELEASE_VERSION}
-git push --tags
 ```
 
-> This must be done on main branch, only maintainers are allowed to push tags on main  
+> When merged on main branch, the version will be published on NPM and git tag will be created  

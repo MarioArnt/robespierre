@@ -6,34 +6,8 @@ on:
       - main
 
 jobs:
-  run_tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Update local toolchain
-        run: |
-          rustup update
-          rustup component add clippy
-          rustup component add rustfmt
-      - name: Toolchain info
-        run: |
-          cargo --version
-          rustc --version
-          cargo fmt --version
-          cargo clippy --version
-      - name: Lint
-        run: |
-          cd src
-          cargo fmt -- --check
-          cargo clippy -- -D warnings
-      - name: Test
-        run: |
-          cargo check
-          cargo test --all          
-
   need_publish:
     runs-on: ubuntu-latest
-    needs: run_tests
     outputs:
       is_bumped: ${{ steps.npm_check.outputs.bump }}
       npm_target_version: ${{ steps.npm_check.outputs.target_version }}
@@ -101,6 +75,15 @@ jobs:
           toolchain: ${{ matrix.build.TOOLCHAIN }}
           target: ${{ matrix.build.TARGET }}
           override: true
+      - name: Lint
+        run: |
+          cd src
+          cargo fmt -- --check
+          cargo clippy -- -D warnings
+      - name: Test
+        run: |
+          cargo check
+          cargo test --all
       - name: Build
         uses: actions-rs/cargo@v1
         with:
