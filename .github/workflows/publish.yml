@@ -37,6 +37,8 @@ jobs:
     outputs:
       is_bumped: ${{ steps.npm_check.outputs.changes }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Install node
         uses: actions/setup-node@v3
         with:
