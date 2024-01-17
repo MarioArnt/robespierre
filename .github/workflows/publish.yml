@@ -130,6 +130,7 @@ jobs:
       - name: Publish the package
         shell: bash
         run: |
+          cp README.md npm/robespierre
           cd npm/robespierre
           npm i
           npm run build
