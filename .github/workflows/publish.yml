@@ -82,6 +82,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Check if already published
         id: npm_check_bin
+        shell: bash
         env:
           TARGET_VERSION: ${{needs.need_publish.outputs.npm_target_version}}
           BUILD_NAME: ${{ matrix.build.NAME }}
