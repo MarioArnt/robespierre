@@ -75,35 +75,50 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: ${{ matrix.build.TOOLCHAIN }}
-          target: ${{ matrix.build.TARGET }}
-          override: true
-      - name: Lint
-        run: |
-          cd src
-          cargo fmt -- --check
-          cargo clippy -- -D warnings
-      - name: Test
-        run: |
-          cargo check
-          cargo test --all
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --locked --target ${{ matrix.build.TARGET }}
-          use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
-
       - name: Install node
         uses: actions/setup-node@v3
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
-
+      - name: Check if already published
+        id: npm_check_bin
+        env:
+          TARGET_VERSION: ${{needs.need_publish.outputs.npm_target_version}}
+          BUILD_NAME: ${{ matrix.build.NAME }}
+        run: |
+          bin="robespierre"
+          node_os=$(echo "${BUILD_NAME}" | cut -d '-' -f1)
+          export node_os
+          node_arch=$(echo "${BUILD_NAME}" | cut -d '-' -f2)
+          export node_arch
+          if [ "${BUILD_OS}" = "windows-2022" ]; then
+            export node_pkg="${bin}-windows-${node_arch}"
+          else
+            export node_pkg="${bin}-${node_os}-${node_arch}"
+          fi
+          current=$(npm view ${node_pkg} --json | jq -r '.version')
+          [[ "$current" == "$TARGET_VERSION" ]] && echo "bump=false" >> "$GITHUB_OUTPUT" || echo "bump=true" >> "$GITHUB_OUTPUT"
+      - name: Install Rust toolchain
+        if: steps.npm_check.outputs.bump == 'true'
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.build.TOOLCHAIN }}
+          target: ${{ matrix.build.TARGET }}
+          override: true
+      - name: Test
+        if: steps.npm_check.outputs.bump == 'true'
+        run: |
+          cargo check
+          cargo test --all
+      - name: Build
+        if: steps.npm_check.outputs.bump == 'true'
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --locked --target ${{ matrix.build.TARGET }}
+          use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }} # use `cross` for Linux builds
       - name: Publish to NPM
+        if: steps.npm_check.outputs.bump == 'true'
         shell: bash
         run: sh ./package.sh --publish
         env:
