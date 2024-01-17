@@ -58,7 +58,7 @@ jobs:
             NAME: win32-arm64-msvc,
             OS: windows-2022,
             TARGET: aarch64-pc-windows-msvc,
-            TOOLCHAIN: stable,
+            TOOLCHAIN: nightly,
           }
           - {
             NAME: darwin-x64,

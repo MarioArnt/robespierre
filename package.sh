@@ -1,4 +1,8 @@
 cd npm
+# check if already published
+manifest=$(jq -r '.version' ./npm/robespierre/package.json)
+npm=$(npm view robespierre --json | jq -r '.version')
+[[ "$manifest" == "$npm" ]] && exit 0 || echo "publishing new version"
 # set the binary name
 bin="robespierre"
 # derive the OS and architecture from the build matrix name
