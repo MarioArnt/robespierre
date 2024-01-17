@@ -98,6 +98,8 @@ jobs:
           else
             export node_pkg="${bin}-${node_os}-${node_arch}"
           fi
+          echo $current
+          echo $TARGET_VERSION
           current=$(npm view ${node_pkg} --json | jq -r '.version')
           [[ "$current" == "$TARGET_VERSION" ]] && echo "bump=false" >> "$GITHUB_OUTPUT" || echo "bump=true" >> "$GITHUB_OUTPUT"
       - name: Install Rust toolchain
@@ -154,9 +156,7 @@ jobs:
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - uses: actions-ecosystem/action-push-tag@v1
-        env:
-          TARGET_VERSION: ${{needs.need_publish.outputs.npm_target_version}}
-        name: Push tag
-        with:
-          tag: $TARGET_VERSION
+#      - uses: rickstaa/action-create-tag@v1
+#        id: "tag_create"
+#        with:
+#          tag: ${{needs.need_publish.outputs.npm_target_version}}
