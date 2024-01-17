@@ -37,8 +37,17 @@ jobs:
     outputs:
       is_bumped: ${{ steps.npm_check.outputs.changes }}
     steps:
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
       - id: npm_check
-        run: sh ./should-bump.sh >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          manifest=$(jq -r '.version' ./npm/robespierre/package.json)
+          npm=$(npm view robespierre --json | jq -r '.version')
+          [[ "$manifest" == "$npm" ]] && echo "false" >> "$GITHUB_OUTPUT" || echo "true" >> "$GITHUB_OUTPUT"
 
   publish-npm-binaries:
     name: Publish NPM packages
