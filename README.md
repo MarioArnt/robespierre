@@ -1,6 +1,9 @@
-<p align="center">
-  <img src="./robespierre.svg?sanitize=true" alt="Logo" width=400 />
-</p>
+![Logo](https://raw.githubusercontent.com/MarioArnt/robespierre/master/robespierre.svg?sanitize=true)
+
+[![npm](https://img.shields.io/npm/v/robespierre)](https://www.npmjs.com/package/robespierre)
+![npm](https://img.shields.io/npm/dm/robespierre)
+[![semantic-release](https://img.shields.io/badge/semantic--release-enabled?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+
 
 Robespierre is a tool built in RUST and packaged via NPM that helps you find extraneous and implicit dependencies by 
 comparing your manifest and actual imports in your **typescript** code using AST parsing.
