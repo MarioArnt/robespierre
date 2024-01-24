@@ -61,9 +61,9 @@ fn process_typescript_file(path: String, actual_imports: &mut HashMap<String, Im
                                     match &import_declaration.src.raw {
                                         Some(src) => {
                                             let line: usize;
-                                            match source_map.lookup_line(module.span.lo) {
+                                            match source_map.span_to_lines(module.span) {
                                                 Ok(source) => {
-                                                    line = source.line
+                                                    line = source.lines[0].line_index
                                                 },
                                                 Err(_) => {
                                                     line = 0;
