@@ -5,6 +5,7 @@ use std::{path::Path, sync::Arc};
 
 use anyhow::Result;
 use glob::glob;
+use log::{debug, error};
 
 use crate::ast_browser::utils::filtered_and_cropped_deps;
 use swc_common::{errors::Handler, SourceMap};
@@ -40,7 +41,7 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
             None,
         )
     });
-    println!("Analyzing path: {:?}", path);
+    debug!("Analyzing path: {:?}", path);
     let mut file_imports: HashSet<String> = HashSet::new();
     let mut is_test_file = false;
     match ast {
@@ -83,7 +84,7 @@ fn process_typescript_file(path: String, actual_imports: &mut HashSet<String>) {
                 }
             }
         }
-        Err(e) => println!("{:?}", e),
+        Err(e) => error!("{:?}", e),
     }
     if !is_test_file {
         actual_imports.extend(file_imports);
@@ -117,7 +118,7 @@ pub fn resolve_actual_imports(project_root: PathBuf, pattern: String) -> HashSet
                     process_typescript_file(path.display().to_string(), &mut actual_imports);
                 }
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => error!("{:?}", e),
         }
     }
     filtered_and_cropped_deps(actual_imports)
