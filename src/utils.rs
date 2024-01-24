@@ -79,9 +79,17 @@ pub fn is_built_in_dep(dependency_string: &str) -> bool {
 pub fn crop_dep_only(dependency: String) -> String {
     let split_dep: Vec<_> = dependency.split('/').collect();
 
+    let organization_dependency = Regex::new(r"^@").unwrap();
+
     match split_dep.len().cmp(&1) {
         Ordering::Equal => String::from(split_dep[0]),
-        Ordering::Greater => split_dep[0].to_owned() + "/" + split_dep[1],
+        Ordering::Greater => {
+            if organization_dependency.is_match(split_dep[0]) {
+                return split_dep[0].to_owned() + "/" + split_dep[1];
+            } else {
+                return split_dep[0].to_owned();
+            }
+        }
         Ordering::Less => String::new(),
     }
 }
@@ -175,15 +183,21 @@ mod crop_dep_only_tests {
     }
 
     #[test]
-    fn namespace_dep_test() {
+    fn namespace_dep_test_with_organization() {
         let result = crop_dep_only(String::from("@angular/core"));
         assert_eq!(result, "@angular/core");
     }
 
     #[test]
-    fn nested_dep_test() {
+    fn nested_dep_test_with_organization() {
         let result = crop_dep_only(String::from("@angular/core/something"));
         assert_eq!(result, "@angular/core");
+    }
+
+    #[test]
+    fn nested_dep_test_without_organization() {
+        let result = crop_dep_only(String::from("rxjs/internal"));
+        assert_eq!(result, "rxjs");
     }
 }
 
@@ -217,13 +231,13 @@ mod filtered_and_cropped_deps_tests {
     #[test]
     fn should_returns_cropped_test() {
         let mut base_deps: HashSet<String> = HashSet::new();
-        let simple_external_dep: String = String::from("node");
+        let simple_external_dep: String = String::from("rxjs");
         let nested_external_dep: String = String::from("@angular/core/truc");
         base_deps.insert(simple_external_dep);
         base_deps.insert(nested_external_dep);
         let result = filtered_and_cropped_deps(base_deps);
         assert_eq!(result.len(), 2);
-        assert!(result.contains("node"));
+        assert!(result.contains("rxjs"));
         assert!(result.contains("@angular/core"));
     }
 
