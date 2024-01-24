@@ -1,7 +1,7 @@
+use crate::ast_browser::ImportStatement;
 use regex::Regex;
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use crate::ast_browser::ImportStatement;
 
 const BUILT_IN: [&str; 41] = [
     "assert",
@@ -220,8 +220,8 @@ mod crop_dep_only_tests {
 #[cfg(test)]
 mod filtered_and_cropped_deps_tests {
     use crate::ast_browser::utils::filtered_and_cropped_deps;
-    use std::collections::HashMap;
     use crate::ast_browser::ImportStatement;
+    use std::collections::HashMap;
 
     fn fake_dep(name: String) -> ImportStatement {
         ImportStatement {
@@ -282,7 +282,10 @@ mod filtered_and_cropped_deps_tests {
         base_deps.insert(simple_external_dep.clone(), fake_dep(simple_external_dep));
         base_deps.insert(nested_external_dep.clone(), fake_dep(nested_external_dep));
         base_deps.insert(internal_dep.clone(), fake_dep(internal_dep));
-        base_deps.insert(namespace_external_dep.clone(), fake_dep(namespace_external_dep));
+        base_deps.insert(
+            namespace_external_dep.clone(),
+            fake_dep(namespace_external_dep),
+        );
 
         filtered_and_cropped_deps(&mut base_deps);
 
@@ -291,6 +294,5 @@ mod filtered_and_cropped_deps_tests {
         assert!(base_deps.contains_key("node"));
         assert!(base_deps.contains_key("@angular/core"));
         assert!(base_deps.contains_key("@something/utils"));
-
     }
 }

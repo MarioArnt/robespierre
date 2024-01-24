@@ -64,14 +64,13 @@ fn process_typescript_file(path: String, actual_imports: &mut HashMap<String, Im
                                         Some(src) => {
                                             let line: usize;
                                             match source_map.lookup_line(module.span.lo) {
-                                                Ok(source) => {
-                                                    line = source.line
-                                                },
+                                                Ok(source) => line = source.line,
                                                 Err(_) => {
                                                     line = 0;
                                                 }
                                             }
-                                            let name = utils::remove_first_and_last_chars(src.to_string());
+                                            let name =
+                                                utils::remove_first_and_last_chars(src.to_string());
                                             let actual_import = ImportStatement {
                                                 name: name.clone(),
                                                 file: path.clone(),
@@ -111,7 +110,10 @@ fn process_typescript_file(path: String, actual_imports: &mut HashMap<String, Im
     }
 }
 
-pub fn resolve_actual_imports(project_root: PathBuf, pattern: String) -> HashMap<String, ImportStatement> {
+pub fn resolve_actual_imports(
+    project_root: PathBuf,
+    pattern: String,
+) -> HashMap<String, ImportStatement> {
     let mut actual_imports: HashMap<String, ImportStatement> = HashMap::new();
     let absolute_pattern = Path::new(&project_root).join(pattern);
     for entry in glob(&absolute_pattern.display().to_string()).expect("Failed to read glob pattern")

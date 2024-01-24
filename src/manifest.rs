@@ -1,10 +1,10 @@
+use log::info;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::option::Option;
 use std::path::{Path, PathBuf};
-use log::{info};
 
 use anyhow::{bail, Ok, Result};
 use serde::{Deserialize, Serialize};
