@@ -62,19 +62,17 @@ fn process_typescript_file(path: String, actual_imports: &mut HashMap<String, Im
                                 if !&import_declaration.type_only {
                                     match &import_declaration.src.raw {
                                         Some(src) => {
-                                            let line: usize;
-                                            match source_map.lookup_line(module.span.lo) {
-                                                Ok(source) => line = source.line,
-                                                Err(_) => {
-                                                    line = 0;
-                                                }
-                                            }
+                                            let line: usize =
+                                                match source_map.lookup_line(module.span.lo) {
+                                                    Ok(source) => source.line,
+                                                    Err(_) => 0,
+                                                };
                                             let name =
                                                 utils::remove_first_and_last_chars(src.to_string());
                                             let actual_import = ImportStatement {
                                                 name: name.clone(),
                                                 file: path.clone(),
-                                                line: line.clone(),
+                                                line,
                                             };
                                             file_imports.insert(name, actual_import);
                                         }

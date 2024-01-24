@@ -86,16 +86,16 @@ pub fn crop_dep_only(dependency: String) -> String {
         Ordering::Equal => String::from(split_dep[0]),
         Ordering::Greater => {
             if organization_dependency.is_match(split_dep[0]) {
-                return split_dep[0].to_owned() + "/" + split_dep[1];
+                split_dep[0].to_owned() + "/" + split_dep[1]
             } else {
-                return split_dep[0].to_owned();
+                split_dep[0].to_owned()
             }
         }
         Ordering::Less => String::new(),
     }
 }
 
-pub fn filtered_and_cropped_deps(dependencies: &mut HashMap<String, ImportStatement>) -> () {
+pub fn filtered_and_cropped_deps(dependencies: &mut HashMap<String, ImportStatement>) {
     let mut keys_to_remove = Vec::new();
     let mut items_to_add: HashMap<String, ImportStatement> = HashMap::new();
 
