@@ -25,7 +25,8 @@ fn main() {
     let declared_dependencies = manifest::read_manifest_dependencies(project_root.clone());
     const DEFAULT_PATTERN: &str = "**/*.ts";
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
-    let actual_imports = ast_browser::resolve_actual_imports(project_root, pattern);
+    let actual_imports_map = ast_browser::resolve_actual_imports(project_root, pattern);
+    let actual_imports = actual_imports_map.keys().cloned().collect();
     match declared_dependencies {
         Ok(declared) => {
             let mut extraneous: Vec<_> = declared.difference(&actual_imports).collect();

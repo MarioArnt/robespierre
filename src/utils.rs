@@ -1,6 +1,7 @@
 use regex::Regex;
 use std::cmp::Ordering;
-use std::collections::HashSet;
+use std::collections::HashMap;
+use crate::ast_browser::ImportStatement;
 
 const BUILT_IN: [&str; 41] = [
     "assert",
@@ -94,12 +95,27 @@ pub fn crop_dep_only(dependency: String) -> String {
     }
 }
 
-pub fn filtered_and_cropped_deps(dependencies: HashSet<String>) -> HashSet<String> {
-    dependencies
-        .into_iter()
-        .filter(|dependency| is_npm_dep(dependency))
-        .map(crop_dep_only)
-        .collect()
+pub fn filtered_and_cropped_deps(dependencies: &mut HashMap<String, ImportStatement>) -> () {
+    let mut keys_to_remove = Vec::new();
+    let mut items_to_add: HashMap<String, ImportStatement> = HashMap::new();
+
+    for (key, dependency) in &mut *dependencies {
+        if !is_npm_dep(&dependency.name) {
+            keys_to_remove.push(key.clone());
+        } else {
+            let new_name = crop_dep_only(dependency.name.clone());
+            if new_name != dependency.name {
+                keys_to_remove.push(key.clone());
+                items_to_add.insert(new_name.clone(), dependency.clone());
+            }
+        }
+    }
+    for key in keys_to_remove {
+        dependencies.remove(&key);
+    }
+    for (key, dependency) in items_to_add {
+        dependencies.insert(key, dependency.clone());
+    }
 }
 
 #[cfg(test)]
@@ -204,60 +220,77 @@ mod crop_dep_only_tests {
 #[cfg(test)]
 mod filtered_and_cropped_deps_tests {
     use crate::ast_browser::utils::filtered_and_cropped_deps;
-    use std::collections::HashSet;
+    use std::collections::HashMap;
+    use crate::ast_browser::ImportStatement;
+
+    fn fake_dep(name: String) -> ImportStatement {
+        ImportStatement {
+            name: name.clone(),
+            file: String::from("@angular/core"),
+            line: 42,
+        }
+    }
 
     #[test]
     fn should_returns_same_test() {
-        let mut base_deps: HashSet<String> = HashSet::new();
+        let mut base_deps: HashMap<String, ImportStatement> = HashMap::new();
         let external_dep: String = String::from("@angular/core");
-        base_deps.insert(external_dep);
-        let result = filtered_and_cropped_deps(base_deps);
-        assert_eq!(result.len(), 1);
-        assert!(result.contains("@angular/core"));
+        base_deps.insert(external_dep.clone(), fake_dep(external_dep));
+
+        filtered_and_cropped_deps(&mut base_deps);
+
+        assert_eq!(base_deps.len(), 1);
+        assert!(base_deps.contains_key("@angular/core"));
     }
 
     #[test]
     fn should_returns_filtered_test() {
-        let mut base_deps: HashSet<String> = HashSet::new();
+        let mut base_deps: HashMap<String, ImportStatement> = HashMap::new();
         let external_dep: String = String::from("@angular/core");
         let internal_dep: String = String::from("./aah");
-        base_deps.insert(external_dep);
-        base_deps.insert(internal_dep);
-        let result = filtered_and_cropped_deps(base_deps);
-        assert_eq!(result.len(), 1);
-        assert!(result.contains("@angular/core"));
+        base_deps.insert(external_dep.clone(), fake_dep(external_dep));
+        base_deps.insert(internal_dep.clone(), fake_dep(internal_dep));
+
+        filtered_and_cropped_deps(&mut base_deps);
+
+        assert_eq!(base_deps.len(), 1);
+        assert!(base_deps.contains_key("@angular/core"));
     }
 
     #[test]
     fn should_returns_cropped_test() {
-        let mut base_deps: HashSet<String> = HashSet::new();
+        let mut base_deps: HashMap<String, ImportStatement> = HashMap::new();
         let simple_external_dep: String = String::from("rxjs");
         let nested_external_dep: String = String::from("@angular/core/truc");
-        base_deps.insert(simple_external_dep);
-        base_deps.insert(nested_external_dep);
-        let result = filtered_and_cropped_deps(base_deps);
-        assert_eq!(result.len(), 2);
-        assert!(result.contains("rxjs"));
-        assert!(result.contains("@angular/core"));
+        base_deps.insert(simple_external_dep.clone(), fake_dep(simple_external_dep));
+        base_deps.insert(nested_external_dep.clone(), fake_dep(nested_external_dep));
+        filtered_and_cropped_deps(&mut base_deps);
+
+        assert_eq!(base_deps.len(), 2);
+        assert!(base_deps.contains_key("rxjs"));
+        assert!(base_deps.contains_key("@angular/core"));
     }
 
     #[test]
     fn should_returns_filtered_and_cropped_test() {
-        let mut base_deps: HashSet<String> = HashSet::new();
+        let mut base_deps: HashMap<String, ImportStatement> = HashMap::new();
         let simple_external_dep: String = String::from("node");
         let nested_external_dep: String = String::from("@angular/core/truc");
         let internal_dep: String = String::from("./aah");
         let namespace_external_dep: String = String::from("@something/utils");
 
-        base_deps.insert(simple_external_dep);
-        base_deps.insert(nested_external_dep);
-        base_deps.insert(internal_dep);
-        base_deps.insert(namespace_external_dep);
+        base_deps.insert(simple_external_dep.clone(), fake_dep(simple_external_dep));
+        base_deps.insert(nested_external_dep.clone(), fake_dep(nested_external_dep));
+        base_deps.insert(internal_dep.clone(), fake_dep(internal_dep));
+        base_deps.insert(namespace_external_dep.clone(), fake_dep(namespace_external_dep));
 
-        let result = filtered_and_cropped_deps(base_deps);
-        assert_eq!(result.len(), 3);
-        assert!(result.contains("node"));
-        assert!(result.contains("@angular/core"));
-        assert!(result.contains("@something/utils"));
+        filtered_and_cropped_deps(&mut base_deps);
+
+        assert_eq!(base_deps.len(), 3);
+
+        assert!(base_deps.contains_key("node"));
+        assert!(base_deps.contains_key("@angular/core"));
+        assert!(base_deps.contains_key("@something/utils"));
+
     }
 }

@@ -157,6 +157,7 @@ jobs:
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+#      TODO: Tag signing with GPG Key
 #      - uses: rickstaa/action-create-tag@v1
 #        id: "tag_create"
 #        with:
