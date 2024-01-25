@@ -21,8 +21,8 @@ mod utils;
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct ImportStatement {
     name: String,
-    file: String,
-    line: usize,
+    pub file: String,
+    pub line: usize,
 }
 
 fn process_typescript_file(path: String, actual_imports: &mut HashMap<String, ImportStatement>) {
@@ -60,20 +60,11 @@ fn process_typescript_file(path: String, actual_imports: &mut HashMap<String, Im
                                 if !&import_declaration.type_only {
                                     match &import_declaration.src.raw {
                                         Some(src) => {
-                                            let line: usize;
-                                            match source_map.span_to_lines(module.span) {
-                                                Ok(source) => {
-                                                    line = source.lines[0].line_index
-                                                },
-                                                Err(_) => {
-                                                    line = 0;
-                                                }
-                                            }
                                             let name = utils::remove_first_and_last_chars(src.to_string());
                                             let actual_import = ImportStatement {
                                                 name: name.clone(),
                                                 file: path.clone(),
-                                                line: line.clone(),
+                                                line: source_map.lookup_char_pos(import_declaration.span.lo).line,
                                             };
                                             file_imports.insert(name, actual_import);
                                         }
