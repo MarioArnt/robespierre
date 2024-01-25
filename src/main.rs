@@ -10,6 +10,8 @@ use ::clap::Parser;
 struct Args {
     #[arg(short, long, default_value_t = false, help = "Output a JSON report")]
     report: bool,
+    #[arg(short, long, default_value_t = false, help = "Verbose mode")]
+    verbose: bool,
 }
 
 mod ast_browser;
@@ -17,14 +19,22 @@ mod manifest;
 mod write_report;
 
 use std::env;
+use std::io::Write;
 use std::string::String;
+use log::{info, error};
+use env_logger::{Builder, Target};
 
 fn main() {
     let args = Args::parse();
+
+    configure_logging(&args);
+
     let project_root = manifest::find_project_root().unwrap();
     let declared_dependencies = manifest::read_manifest_dependencies(project_root.clone());
+
     const DEFAULT_PATTERN: &str = "**/*.ts";
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
+
     let actual_imports_map = ast_browser::resolve_actual_imports(project_root, pattern);
     let actual_imports = actual_imports_map.keys().cloned().collect();
     match declared_dependencies {
@@ -38,15 +48,31 @@ fn main() {
                 write_report::write_json_report(extraneous.clone(), implicit.clone());
             }
 
-            println!("Extraneous dependencies");
+            info!("Extraneous dependencies");
             for dep in extraneous {
-                println!("{:?}", dep);
+                info!("{:?}", dep);
             }
-            println!("Implicit dependencies");
+            info!("Implicit dependencies");
             for dep in implicit {
-                println!("{:?}", dep);
+                info!("{:?}", dep);
             }
         }
-        Err(err) => println!("{:?}", err),
+        Err(err) => error!("{:?}", err),
     }
+}
+
+fn configure_logging(args: &Args) {
+    let mut logging_builder = Builder::from_default_env();
+
+    logging_builder.format(|buf, record| {
+        writeln!(buf, "{}", record.args())
+    });
+
+    if args.verbose {
+        logging_builder.filter_level(log::LevelFilter::Debug);
+    } else {
+        logging_builder.filter_level(log::LevelFilter::Info);
+    }
+    logging_builder.target(Target::Stdout);
+    logging_builder.init();
 }
