@@ -18,11 +18,11 @@ mod ast_browser;
 mod manifest;
 mod write_report;
 
+use env_logger::{Builder, Target};
+use log::{error, info};
 use std::env;
 use std::io::Write;
 use std::string::String;
-use log::{info, error};
-use env_logger::{Builder, Target};
 
 fn main() {
     let args = Args::parse();
@@ -35,7 +35,8 @@ fn main() {
     const DEFAULT_PATTERN: &str = "**/*.ts";
     let pattern: String = env::var("ROBESPIERRE_SOURCES").unwrap_or(DEFAULT_PATTERN.to_string());
 
-    let actual_imports = ast_browser::resolve_actual_imports(project_root, pattern);
+    let actual_imports_map = ast_browser::resolve_actual_imports(project_root, pattern);
+    let actual_imports = actual_imports_map.keys().cloned().collect();
 
     match declared_dependencies {
         Ok(declared) => {
@@ -64,9 +65,7 @@ fn main() {
 fn configure_logging(args: &Args) {
     let mut logging_builder = Builder::from_default_env();
 
-    logging_builder.format(|buf, record| {
-        writeln!(buf, "{}", record.args())
-    });
+    logging_builder.format(|buf, record| writeln!(buf, "{}", record.args()));
 
     if args.verbose {
         logging_builder.filter_level(log::LevelFilter::Debug);
