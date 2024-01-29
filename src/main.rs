@@ -31,6 +31,7 @@ use serde_json::{json, to_string_pretty};
 use std::env;
 use std::io::Write;
 use std::string::String;
+use ansi_term::Style;
 
 fn main() {
     let args = Args::parse();
@@ -65,13 +66,15 @@ fn main() {
                 let json_to_print = to_string_pretty(&json_output).unwrap();
                 info!("{}", json_to_print);
             } else {
-                info!("Extraneous dependencies");
+                info!("{}", Style::new().bold().paint("Extraneous dependencies:"));
                 for dep in extraneous {
-                    info!("{:?}", dep);
+                    info!("├── {}", Style::new().underline().paint(dep));
                 }
-                info!("Implicit dependencies");
+                info!("{}", Style::new().bold().paint("Implicit dependencies:"));
                 for dep in implicit {
-                    info!("{:?}", dep);
+                    let details = actual_imports_map.get(dep).unwrap();
+                    info!("├── {}", Style::new().underline().paint(dep));
+                    info!("│   └── file://{}:{}", details.file, details.line);
                 }
             }
         }
