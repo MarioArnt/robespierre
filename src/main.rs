@@ -25,13 +25,13 @@ mod ast_browser;
 mod manifest;
 mod write_report;
 
+use ansi_term::Style;
 use env_logger::{Builder, Target};
 use log::{error, info};
 use serde_json::{json, to_string_pretty};
 use std::env;
 use std::io::Write;
 use std::string::String;
-use ansi_term::Style;
 
 fn main() {
     let args = Args::parse();
