@@ -10,6 +10,13 @@ use ::clap::Parser;
 struct Args {
     #[arg(short, long, default_value_t = false, help = "Output a JSON report")]
     report: bool,
+    #[arg(
+        short,
+        long,
+        default_value_t = false,
+        help = "Display output in JSON format"
+    )]
+    json: bool,
     #[arg(short, long, default_value_t = false, help = "Verbose mode")]
     verbose: bool,
 }
@@ -20,6 +27,7 @@ mod write_report;
 
 use env_logger::{Builder, Target};
 use log::{error, info};
+use serde_json::{json, to_string_pretty};
 use std::env;
 use std::io::Write;
 use std::string::String;
@@ -49,13 +57,22 @@ fn main() {
                 write_report::write_json_report(extraneous.clone(), implicit.clone());
             }
 
-            info!("Extraneous dependencies");
-            for dep in extraneous {
-                info!("{:?}", dep);
-            }
-            info!("Implicit dependencies");
-            for dep in implicit {
-                info!("{:?}", dep);
+            if args.json {
+                let json_output = json!({
+                    "extraneous_dependencies": extraneous,
+                    "implicit_dependencies": implicit,
+                });
+                let json_to_print = to_string_pretty(&json_output).unwrap();
+                info!("{}", json_to_print);
+            } else {
+                info!("Extraneous dependencies");
+                for dep in extraneous {
+                    info!("{:?}", dep);
+                }
+                info!("Implicit dependencies");
+                for dep in implicit {
+                    info!("{:?}", dep);
+                }
             }
         }
         Err(err) => error!("{:?}", err),

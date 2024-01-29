@@ -1,4 +1,4 @@
-use log::info;
+use log::debug;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
@@ -41,7 +41,7 @@ fn find_closest_parent_manifest(path: &Path) -> Option<&Path> {
 
 pub fn read_manifest_dependencies(project_root: PathBuf) -> Result<HashSet<String>> {
     let manifest_path = project_root.join("package.json");
-    info!("Found manifest path at {}", manifest_path.display());
+    debug!("Found manifest path at {}", manifest_path.display());
     let raw =
         fs::read_to_string(manifest_path).expect("Should have been able to read the manifest");
     let manifest: Manifest = serde_json::from_str(&raw).expect("Cannot parse manifest");
