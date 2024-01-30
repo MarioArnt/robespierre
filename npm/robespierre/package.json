@@ -1,6 +1,6 @@
 {
   "name": "robespierre",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "description": "Find extraneous and implicit dependencies by comparing your manifest and actual imports in your code using AST parsing",
   "bin": "lib/index.js",
   "scripts": {
@@ -35,11 +35,11 @@
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {
-    "robespierre-linux-x64": "1.0.0-beta.5",
-    "robespierre-linux-arm64": "1.0.0-beta.5",
-    "robespierre-darwin-x64": "1.0.0-beta.5",
-    "robespierre-darwin-arm64": "1.0.0-beta.5",
-    "robespierre-windows-x64": "1.0.0-beta.5"
+    "robespierre-linux-x64": "1.0.0-beta.6",
+    "robespierre-linux-arm64": "1.0.0-beta.6",
+    "robespierre-darwin-x64": "1.0.0-beta.6",
+    "robespierre-darwin-arm64": "1.0.0-beta.6",
+    "robespierre-windows-x64": "1.0.0-beta.6"
   },
   "eslintConfig": {
     "extends": [
